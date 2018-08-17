@@ -1,21 +1,15 @@
 import re
 import subprocess
 
-CONCURBOT_ALL_TESTS_PATH = 'hipmunk/hello/concur/tests'
+DEFAULT_TMUX_SESSION_NAME = '0'
+DEFAULT_TMUX_WINDOW = 'testing'
 PYTEST_COMMAND_TEMPLATE = (
     "'docker exec -it hipmunk_concurbot_1 pytest /hipmunk/{path_details} -s'"
 )
-TMUX_SESSION_NAME = '0'
-TMUX_WINDOW = 'testing'
 
-TMUX_WINDOW_ID = "{}:{}".format(TMUX_SESSION_NAME, TMUX_WINDOW)
-TMUX_COMMAND_TEMPLATE = "tmux send-keys -t {window_id} {command} c-m".format(
-    window_id=TMUX_WINDOW_ID, command='{command}'
-)
-
-CONCURBOT_REL_PATH_REGEX = re.compile('hipmunk/hello/concur/tests/.*')
-
-PYTEST_CLASS_REGEX = re.compile('class (Test\w*)\(\w*\):')
+CONCURBOT_TESTS_PATH = 'hipmunk/hello/concur/tests'
+CONCURBOT_TESTS_PATH_REGEX = re.compile(CONCURBOT_TESTS_PATH + '/.*')
+PYTEST_CLASS_REGEX = re.compile(r'class (Test\w*)\(\w*\):')
 GENERAL_PYTEST_TEST_DEF_REGEX = re.compile(r'def (test\w*)\(')
 PYTEST_FUNCTION_REGEX = re.compile(r'^def (test\w*)\(')
 PYTEST_METHOD_REGEX = re.compile(r'^\s{4}def (test\w*)\(')
@@ -25,16 +19,24 @@ RUN_PYTEST_FUNCTION_PATTERN = "{module_path}::{function_name}"
 RUN_PYTEST_METHOD_PATTERN = "{module_path}::{class_name}::{method_name}"
 
 
+# def run_unit_tests(file_with_path, line_num, test_type):
+#     file_wrapper = UnitTestFileWrapper(file_with_path, line_num)
+#     test_type = _detect_test_type(file_wrapper)
+
+
+# def _detect_test_type(file_wrapper):
+
+
 class PyTestTestRunner:
     def run_tests(self, file_with_path, line_num, test_type):
         self.file_wrapper = UnitTestFileWrapper(file_with_path, line_num)
         self.file_name_with_path = (
-            self.file_wrapper.filename_from_hipmunk_dir_with_path
+            self.file_wrapper.filename_from_second_hipmunk_dir_with_path
         )
 
         error_msg = None
         if test_type == 'all':
-            path_details = CONCURBOT_ALL_TESTS_PATH
+            path_details = CONCURBOT_TESTS_PATH
         if test_type == 'file':
             path_details = self.file_name_with_path
         if test_type == 'class':
@@ -75,7 +77,7 @@ class PyTestUnitTestFinder:
     def __init__(self, file_wrapper):
         self.file_wrapper = file_wrapper
         self.file_name_with_path = (
-            self.file_wrapper.filename_from_hipmunk_dir_with_path
+            self.file_wrapper.filename_from_second_hipmunk_dir_with_path
         )
 
     def get_path_details(self):
@@ -149,46 +151,48 @@ class UnitTestFileWrapper:
         return text
 
     @property
-    def filename_from_hipmunk_dir_with_path(self):
-        match = CONCURBOT_REL_PATH_REGEX.search(self.file_with_path)
+    def filename_from_second_hipmunk_dir_with_path(self):
+        match = CONCURBOT_TESTS_PATH_REGEX.search(self.file_with_path)
         return match.group()
 
 
 class TMUXWrapper:
+    window_id = "{}:{}".format(DEFAULT_TMUX_SESSION_NAME, DEFAULT_TMUX_WINDOW)
+
     @classmethod
-    def send_command(self, command):
-        self._prepare_tmux()
-        self._execute_shell_command(
-            TMUX_COMMAND_TEMPLATE.format(command=command)
+    def send_command(cls, command):
+        cls._prepare_tmux()
+        cls._execute_shell_command(
+            "tmux send-keys -t {window_id} {command} c-m".format(
+                window_id=cls.window_id, command=command
+            )
         )
 
     @classmethod
-    def display_message(self, message):
-        self._prepare_tmux()
-        self._execute_shell_command(
-            "tmux display-message '{}'".format(message)
+    def display_message(cls, message):
+        cls._prepare_tmux()
+        cls._execute_shell_command("tmux display-message '{}'".format(message))
+
+    @classmethod
+    def _prepare_tmux(cls):
+        cls._activate_window()
+        cls._exit_scroll_mode()
+        cls._clear_buffer_history()
+
+    @classmethod
+    def _activate_window(cls):
+        cls._execute_shell_command(
+            "tmux select-window -t {}".format(cls.window_id)
         )
 
     @classmethod
-    def _prepare_tmux(self):
-        self._activate_window()
-        self._exit_scroll_mode()
-        self._clear_buffer_history()
+    def _exit_scroll_mode(cls):
+        cls._execute_shell_command("tmux send-keys -t 'q'")
 
     @classmethod
-    def _activate_window(self):
-        self._execute_shell_command(
-            "tmux select-window -t {}".format(TMUX_WINDOW_ID)
-        )
+    def _clear_buffer_history(cls):
+        cls._execute_shell_command("tmux send-keys -R C-l \; clear-history")
 
     @classmethod
-    def _exit_scroll_mode(self):
-        self._execute_shell_command("tmux send-keys -t 'q'")
-
-    @classmethod
-    def _clear_buffer_history(self):
-        self._execute_shell_command("tmux send-keys -R C-l \; clear-history")
-
-    @classmethod
-    def _execute_shell_command(self, command):
+    def _execute_shell_command(cls, command):
         subprocess.call(command, shell=True)
