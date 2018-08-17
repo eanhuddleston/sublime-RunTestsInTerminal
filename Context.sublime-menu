@@ -1,0 +1,23 @@
+[
+    {
+        "caption": "HipTestRunner",
+        "children": [
+            {
+                "caption": "Run unit test under cursor",
+                "command": "run_tests_current_unit"
+            },
+            {
+                "caption": "Run all tests in class under cursor",
+                "command": "run_tests_current_class"
+            },
+            {
+                "caption": "Run all tests in current file",
+                "command": "run_tests_current_file"
+            },
+            {
+                "caption": "Run all tests",
+                "command": "run_tests_all"
+            }
+        ]
+    }
+]
