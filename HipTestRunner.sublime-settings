@@ -1,0 +1,20 @@
+/*
+   HipTestRunner default settings
+   Modify these settings in *.sublime-project file
+*/
+{
+    /*
+        Tmux window_id.  A string in the format: <session_name>:<window_name>
+    */
+    "tmux_window_id": "0:testing",
+
+    /*
+        Nose command template. Must include the "{}",
+    */
+    "nose_command_template": "'hiptest {}'",
+
+    /*
+        Pytest command template
+    */
+    "pytest_command_template": "'docker exec -it hipmunk_concurbot_1 pytest /hipmunk/{} -s'"
+}
