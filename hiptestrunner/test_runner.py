@@ -4,9 +4,9 @@ import subprocess
 DEFAULT_TMUX_SESSION_NAME = '0'
 DEFAULT_TMUX_WINDOW = 'testing'
 DEFAULT_PYTEST_COMMAND_TEMPLATE = (
-    "'docker exec -it hipmunk_concurbot_1 pytest /hipmunk/{path_details} -s'"
+    "docker exec -it hipmunk_concurbot_1 pytest /hipmunk/{} -s"
 )
-DEFAULT_NOSE_COMMAND_TEMPLATE = ("'hiptest {path_details}'")
+DEFAULT_NOSE_COMMAND_TEMPLATE = ("hiptest {}")
 
 CONCURBOT_TESTS_PATH = 'Hipmunk/hipmunk/hello/concur/tests'
 MONOLITH_TESTS_PATH = 'Hipmunk/tests'
@@ -79,10 +79,7 @@ class TestRunnerBase():
         if error_msg:
             TMUXWrapper.display_message(error_msg)
             return
-
-        pytest_command = self.command_template.format(
-            path_details=path_details
-        )
+        pytest_command = self.command_template.format(path_details)
         TMUXWrapper.send_command(pytest_command)
 
     def _get_path_details_for_class(self):
@@ -237,7 +234,7 @@ class TMUXWrapper:
     def send_command(cls, command):
         cls._prepare_tmux()
         cls._execute_shell_command(
-            "tmux send-keys -t {window_id} {command} c-m".format(
+            "tmux send-keys -t {window_id} '{command}' c-m".format(
                 window_id=cls.window_id, command=command
             )
         )

@@ -4,6 +4,10 @@ import sublime_plugin
 
 class BaseTestCommand(sublime_plugin.TextCommand):
     def run(self, edit):
+        # tmux_window_id = self._get_setting('tmux_window_id')
+        # nose_command_template = self._get_setting('nose_command_template')
+        # pytest_command_template = self._get_setting('pytest_command_template')
+
         print(
             "args:",
             "{} {} {}".format(
@@ -13,6 +17,12 @@ class BaseTestCommand(sublime_plugin.TextCommand):
         run_unit_tests(
             self._file_with_path, self._current_line, self.test_type
         )
+
+    def _get_setting(self, setting_name):
+        setting_value = self.view.settings().get(setting_name, None)
+        if setting_value:
+            return setting_value.lower()
+        return None
 
     @property
     def _file_with_path(self):
