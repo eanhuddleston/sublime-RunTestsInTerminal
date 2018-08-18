@@ -30,25 +30,32 @@ RUN_NOSE_CLASS_PATTERN = "{module_path}:{class_name}"
 RUN_NOSE_METHOD_PATTERN = "{module_path}:{class_name}.{method_name}"
 
 
-def run_unit_tests(file_with_path, line_num, test_type):
-    codebase = _detect_codebase_using_file_location(file_with_path)
+def run_unit_tests(
+    filename_with_full_path,
+    line_num,
+    test_type,
+    nose_command_template=None,
+    pytest_command_template=None,
+    tmux_window_id=None,
+):
+    codebase = _detect_codebase_using_file_location(filename_with_full_path)
     if codebase == 'concurbot':
         run_cls = ConcurbotTestRunner
     elif codebase == 'monolith':
         run_cls = MonolithTestRunner
-    run_cls().run_tests(file_with_path, line_num, test_type)
+    run_cls().run_tests(filename_with_full_path, line_num, test_type)
 
 
-def _detect_codebase_using_file_location(file_with_path):
-    if CONCURBOT_TESTS_PATH_REGEX.search(file_with_path):
+def _detect_codebase_using_file_location(filename_with_full_path):
+    if CONCURBOT_TESTS_PATH_REGEX.search(filename_with_full_path):
         return 'concurbot'
-    elif MONOLITH_TESTS_PATH_REGEX.search(file_with_path):
+    elif MONOLITH_TESTS_PATH_REGEX.search(filename_with_full_path):
         return 'monolith'
 
 
 class TestRunnerBase():
-    def run_tests(self, file_with_path, line_num, test_type):
-        self.file_wrapper = TestFileWrapper(file_with_path, line_num)
+    def run_tests(self, filename_with_full_path, line_num, test_type):
+        self.file_wrapper = TestFileWrapper(filename_with_full_path, line_num)
 
         self.file_name_with_path = (
             self.file_wrapper.filename_with_path_from_regex(
@@ -189,13 +196,13 @@ class ConcurbotTestRunner(TestRunnerBase):
 
 
 class TestFileWrapper:
-    def __init__(self, file_with_path, starting_line_num):
-        self.file_with_path = file_with_path
+    def __init__(self, filename_with_full_path, starting_line_num):
+        self.filename_with_full_path = filename_with_full_path
         self.starting_line_num = starting_line_num
         self.current_line_num = starting_line_num
         self.text_from_last_line_read = ""
 
-        with open(file_with_path) as f:
+        with open(filename_with_full_path) as f:
             self.lines = f.read().splitlines()
 
     def find_pattern_from_starting_line(self, regex):
@@ -220,7 +227,7 @@ class TestFileWrapper:
         return text
 
     def filename_with_path_from_regex(self, regex):
-        match = regex.search(self.file_with_path)
+        match = regex.search(self.filename_with_full_path)
         if match:
             return match.group()
         return None
