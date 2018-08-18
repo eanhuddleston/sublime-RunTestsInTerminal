@@ -8,10 +8,10 @@ PYTEST_COMMAND_TEMPLATE = (
 )
 NOSE_COMMAND_TEMPLATE = ("'runt {path_details}'")
 
-CONCURBOT_TESTS_PATH = 'hipmunk/hello/concur/tests'
-CONCURBOT_TESTS_PATH_REGEX = re.compile(CONCURBOT_TESTS_PATH + '/.*')
+CONCURBOT_TESTS_PATH = 'Hipmunk/hipmunk/hello/concur/tests'
+CONCURBOT_TESTS_PATH_REGEX = re.compile(CONCURBOT_TESTS_PATH[8:] + '/.*')
 MONOLITH_TESTS_PATH = 'Hipmunk/tests'
-MONOLITH_TESTS_PATH_REGEX = re.compile(MONOLITH_TESTS_PATH + '/.*')
+MONOLITH_TESTS_PATH_REGEX = re.compile(MONOLITH_TESTS_PATH[8:] + '/.*')
 
 PYTEST_CLASS_REGEX = re.compile(r'class (Test\w*)\(\w*\):')
 GENERAL_PYTEST_TEST_DEF_REGEX = re.compile(r'def (test\w*)\(')
@@ -105,7 +105,7 @@ class NoseUnitTestFinder:
         )
 
     def get_path_details(self):
-        return RUN_NOSE_METHOD_PATTERN(
+        return RUN_NOSE_METHOD_PATTERN.format(
             module_path=self.file_name_with_path,
             class_name=self._class_name,
             method_name=self._method_name,
