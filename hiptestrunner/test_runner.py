@@ -1,8 +1,7 @@
 import re
 import subprocess
 
-DEFAULT_TMUX_SESSION_NAME = '0'
-DEFAULT_TMUX_WINDOW = 'testing'
+DEFAULT_TMUX_WINDOW_ID = '0:testing'
 DEFAULT_PYTEST_COMMAND_TEMPLATE = (
     "docker exec -it hipmunk_concurbot_1 pytest /hipmunk/{} -s"
 )
@@ -228,14 +227,12 @@ class TestFileWrapper:
 
 
 class TMUXWrapper:
-    window_id = "{}:{}".format(DEFAULT_TMUX_SESSION_NAME, DEFAULT_TMUX_WINDOW)
-
     @classmethod
     def send_command(cls, command):
         cls._prepare_tmux()
         cls._execute_shell_command(
             "tmux send-keys -t {window_id} '{command}' c-m".format(
-                window_id=cls.window_id, command=command
+                window_id=DEFAULT_TMUX_WINDOW_ID, command=command
             )
         )
 
@@ -253,7 +250,7 @@ class TMUXWrapper:
     @classmethod
     def _activate_window(cls):
         cls._execute_shell_command(
-            "tmux select-window -t {}".format(cls.window_id)
+            "tmux select-window -t {}".format(DEFAULT_TMUX_WINDOW_ID)
         )
 
     @classmethod
