@@ -30,7 +30,7 @@ RUN_NOSE_METHOD_PATTERN = "{module_path}:{class_name}.{method_name}"
 
 
 def run_unit_tests(file_with_path, line_num, test_type):
-    codebase = _detect_codebase(file_with_path)
+    codebase = _detect_codebase_using_file_location(file_with_path)
     if codebase == 'concurbot':
         run_cls = ConcurbotTestRunner
     elif codebase == 'monolith':
@@ -38,23 +38,26 @@ def run_unit_tests(file_with_path, line_num, test_type):
     run_cls().run_tests(file_with_path, line_num, test_type)
 
 
-def _detect_codebase(file_with_path):
+def _detect_codebase_using_file_location(file_with_path):
     if CONCURBOT_TESTS_PATH_REGEX.search(file_with_path):
         return 'concurbot'
     elif MONOLITH_TESTS_PATH_REGEX.search(file_with_path):
         return 'monolith'
 
 
-def MonolithTestRunner():
+class TestRunnerBase():
     def run_tests(self, file_with_path, line_num, test_type):
-        self.file_wrapper = UnitTestFileWrapper(file_with_path, line_num)
+        self.file_wrapper = TestFileWrapper(file_with_path, line_num)
+
         self.file_name_with_path = (
-            self.file_wrapper.filename_with_path_for_monolith_test
+            self.file_wrapper.filename_with_path_from_regex(
+                self.codebase_tests_path_regex
+            )
         )
 
         error_msg = None
         if test_type == 'all':
-            path_details = MONOLITH_TESTS_PATH
+            path_details = self.codebase_tests_path
         if test_type == 'file':
             path_details = self.file_name_with_path
         if test_type == 'class':
@@ -64,7 +67,7 @@ def MonolithTestRunner():
                     self.file_name_with_path
                 )
         if test_type == 'unit':
-            test_finder = NoseUnitTestFinder(self.file_wrapper)
+            test_finder = self.test_finder_cls(self.file_wrapper)
             path_details = test_finder.get_path_details()
             if path_details is None:
                 error_msg = "No unit test found in: {}".format(
@@ -75,18 +78,19 @@ def MonolithTestRunner():
             TMUXWrapper.display_message(error_msg)
             return
 
-        pytest_command = NOSE_COMMAND_TEMPLATE.format(
+        pytest_command = self.command_template.format(
             path_details=path_details
         )
         TMUXWrapper.send_command(pytest_command)
 
     def _get_path_details_for_class(self):
-        class_name = self.file_wrapper.find_pattern_from_starting_line(
-            NOSE_CLASS_REGEX
+        class_name = (
+            self.file_wrapper.find_pattern_from_starting_line(self.class_regex)
         )
         if class_name:
-            return RUN_NOSE_CLASS_PATTERN.format(
-                module_path=self.file_name_with_path, class_name=class_name
+            return self.run_class_pattern.format(
+                module_path=self.file_name_with_path,
+                class_name=class_name,
             )
         return None
 
@@ -95,7 +99,9 @@ class NoseUnitTestFinder:
     def __init__(self, file_wrapper):
         self.file_wrapper = file_wrapper
         self.file_name_with_path = (
-            self.file_wrapper.filename_with_path_for_monolith_test
+            self.file_wrapper.filename_with_path_from_regex(
+                MONOLITH_TESTS_PATH_REGEX
+            )
         )
 
     def get_path_details(self):
@@ -118,57 +124,13 @@ class NoseUnitTestFinder:
         )
 
 
-class ConcurbotTestRunner():
-    def run_tests(self, file_with_path, line_num, test_type):
-        self.file_wrapper = UnitTestFileWrapper(file_with_path, line_num)
-        self.file_name_with_path = (
-            self.file_wrapper.filename_with_path_for_concurbot_test
-        )
-
-        error_msg = None
-        if test_type == 'all':
-            path_details = CONCURBOT_TESTS_PATH
-        if test_type == 'file':
-            path_details = self.file_name_with_path
-        if test_type == 'class':
-            path_details = self._get_path_details_for_class()
-            if path_details is None:
-                error_msg = "No class found in: {}".format(
-                    self.file_name_with_path
-                )
-        if test_type == 'unit':
-            test_finder = PyTestUnitTestFinder(self.file_wrapper)
-            path_details = test_finder.get_path_details()
-            if path_details is None:
-                error_msg = "No unit test found in: {}".format(
-                    self.file_name_with_path
-                )
-
-        if error_msg:
-            TMUXWrapper.display_message(error_msg)
-            return
-
-        pytest_command = PYTEST_COMMAND_TEMPLATE.format(
-            path_details=path_details
-        )
-        TMUXWrapper.send_command(pytest_command)
-
-    def _get_path_details_for_class(self):
-        class_name = self.file_wrapper.find_pattern_from_starting_line(
-            PYTEST_CLASS_REGEX
-        )
-        if class_name:
-            return RUN_PYTEST_CLASS_PATTERN.format(
-                module_path=self.file_name_with_path, class_name=class_name
-            )
-        return None
-
-
 class PyTestUnitTestFinder:
     def __init__(self, file_wrapper):
         self.file_wrapper = file_wrapper
         self.file_name_with_path = (
-            self.file_wrapper.filename_with_path_for_concurbot_test
+            self.file_wrapper.filename_with_path_from_regex(
+                CONCURBOT_TESTS_PATH_REGEX
+            )
         )
 
     def get_path_details(self):
@@ -210,7 +172,25 @@ class PyTestUnitTestFinder:
         return None
 
 
-class UnitTestFileWrapper:
+class MonolithTestRunner(TestRunnerBase):
+    codebase_tests_path = MONOLITH_TESTS_PATH
+    codebase_tests_path_regex = MONOLITH_TESTS_PATH_REGEX
+    command_template = NOSE_COMMAND_TEMPLATE
+    test_finder_cls = NoseUnitTestFinder
+    class_regex = NOSE_CLASS_REGEX
+    run_class_pattern = RUN_NOSE_CLASS_PATTERN
+
+
+class ConcurbotTestRunner(TestRunnerBase):
+    codebase_tests_path = CONCURBOT_TESTS_PATH
+    codebase_tests_path_regex = CONCURBOT_TESTS_PATH_REGEX
+    command_template = PYTEST_COMMAND_TEMPLATE
+    test_finder_cls = PyTestUnitTestFinder
+    class_regex = PYTEST_CLASS_REGEX
+    run_class_pattern = RUN_PYTEST_CLASS_PATTERN
+
+
+class TestFileWrapper:
     def __init__(self, file_with_path, starting_line_num):
         self.file_with_path = file_with_path
         self.starting_line_num = starting_line_num
@@ -241,15 +221,11 @@ class UnitTestFileWrapper:
         self.current_line_num -= 1
         return text
 
-    @property
-    def filename_with_path_for_concurbot_test(self):
-        match = CONCURBOT_TESTS_PATH_REGEX.search(self.file_with_path)
-        return match.group()
-
-    @property
-    def filename_with_path_for_monolith_test(self):
-        match = MONOLITH_TESTS_PATH_REGEX.search(self.file_with_path)
-        return match.group()
+    def filename_with_path_from_regex(self, regex):
+        match = regex.search(self.file_with_path)
+        if match:
+            return match.group()
+        return None
 
 
 class TMUXWrapper:
