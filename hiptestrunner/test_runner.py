@@ -9,6 +9,8 @@ PYTEST_COMMAND_TEMPLATE = (
 
 CONCURBOT_TESTS_PATH = 'hipmunk/hello/concur/tests'
 CONCURBOT_TESTS_PATH_REGEX = re.compile(CONCURBOT_TESTS_PATH + '/.*')
+MONOLITH_TESTS_PATH_REGEX = re.compile(r'Hipmunk/tests')
+
 PYTEST_CLASS_REGEX = re.compile(r'class (Test\w*)\(\w*\):')
 GENERAL_PYTEST_TEST_DEF_REGEX = re.compile(r'def (test\w*)\(')
 PYTEST_FUNCTION_REGEX = re.compile(r'^def (test\w*)\(')
@@ -19,19 +21,28 @@ RUN_PYTEST_FUNCTION_PATTERN = "{module_path}::{function_name}"
 RUN_PYTEST_METHOD_PATTERN = "{module_path}::{class_name}::{method_name}"
 
 
-# def run_unit_tests(file_with_path, line_num, test_type):
-#     file_wrapper = UnitTestFileWrapper(file_with_path, line_num)
-#     test_type = _detect_test_type(file_wrapper)
+def run_unit_tests(file_with_path, line_num, test_type):
+    codebase = _detect_codebase(file_with_path)
+    if codebase == 'concurbot':
+        run_cls = ConcurbotTestRunner
+    elif codebase == 'monolith':
+        pass
+        # run_cls = MonolithTestRunner
+    run_cls().run_tests(file_with_path, line_num, test_type)
 
 
-# def _detect_test_type(file_wrapper):
+def _detect_codebase(file_with_path):
+    if CONCURBOT_TESTS_PATH_REGEX.search(file_with_path):
+        return 'concurbot'
+    elif MONOLITH_TESTS_PATH_REGEX.search(file_with_path):
+        return 'monolith'
 
 
-class PyTestTestRunner:
+class ConcurbotTestRunner:
     def run_tests(self, file_with_path, line_num, test_type):
         self.file_wrapper = UnitTestFileWrapper(file_with_path, line_num)
         self.file_name_with_path = (
-            self.file_wrapper.filename_from_second_hipmunk_dir_with_path
+            self.file_wrapper.filename_with_path_for_concurbot_test
         )
 
         error_msg = None
@@ -77,7 +88,7 @@ class PyTestUnitTestFinder:
     def __init__(self, file_wrapper):
         self.file_wrapper = file_wrapper
         self.file_name_with_path = (
-            self.file_wrapper.filename_from_second_hipmunk_dir_with_path
+            self.file_wrapper.filename_with_path_for_concurbot_test
         )
 
     def get_path_details(self):
@@ -151,7 +162,7 @@ class UnitTestFileWrapper:
         return text
 
     @property
-    def filename_from_second_hipmunk_dir_with_path(self):
+    def filename_with_path_for_concurbot_test(self):
         match = CONCURBOT_TESTS_PATH_REGEX.search(self.file_with_path)
         return match.group()
 

@@ -1,12 +1,16 @@
-import subprocess
-
-from .hiptestrunner.test_runner import PyTestTestRunner
+from .hiptestrunner.test_runner import run_unit_tests
 import sublime_plugin
 
 
 class BaseTestCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        PyTestTestRunner().run_tests(
+        print(
+            "args:",
+            "{} {} {}".format(
+                self._file_with_path, self._current_line, self.test_type
+            ),
+        )
+        run_unit_tests(
             self._file_with_path, self._current_line, self.test_type
         )
 
