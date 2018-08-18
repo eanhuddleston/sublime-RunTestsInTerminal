@@ -3,14 +3,16 @@ import subprocess
 
 DEFAULT_TMUX_SESSION_NAME = '0'
 DEFAULT_TMUX_WINDOW = 'testing'
-PYTEST_COMMAND_TEMPLATE = (
+DEFAULT_PYTEST_COMMAND_TEMPLATE = (
     "'docker exec -it hipmunk_concurbot_1 pytest /hipmunk/{path_details} -s'"
 )
-NOSE_COMMAND_TEMPLATE = ("'runt {path_details}'")
+DEFAULT_NOSE_COMMAND_TEMPLATE = ("'hiptest {path_details}'")
 
 CONCURBOT_TESTS_PATH = 'Hipmunk/hipmunk/hello/concur/tests'
-CONCURBOT_TESTS_PATH_REGEX = re.compile(CONCURBOT_TESTS_PATH[8:] + '/.*')
 MONOLITH_TESTS_PATH = 'Hipmunk/tests'
+# Chop off 'Hipmunk/' in below, so the resulting command can be
+# run from 'Hipmunk' dir:
+CONCURBOT_TESTS_PATH_REGEX = re.compile(CONCURBOT_TESTS_PATH[8:] + '/.*')
 MONOLITH_TESTS_PATH_REGEX = re.compile(MONOLITH_TESTS_PATH[8:] + '/.*')
 
 PYTEST_CLASS_REGEX = re.compile(r'class (Test\w*)\(\w*\):')
@@ -175,7 +177,7 @@ class PyTestUnitTestFinder:
 class MonolithTestRunner(TestRunnerBase):
     codebase_tests_path = MONOLITH_TESTS_PATH
     codebase_tests_path_regex = MONOLITH_TESTS_PATH_REGEX
-    command_template = NOSE_COMMAND_TEMPLATE
+    command_template = DEFAULT_NOSE_COMMAND_TEMPLATE
     test_finder_cls = NoseUnitTestFinder
     class_regex = NOSE_CLASS_REGEX
     run_class_pattern = RUN_NOSE_CLASS_PATTERN
@@ -184,7 +186,7 @@ class MonolithTestRunner(TestRunnerBase):
 class ConcurbotTestRunner(TestRunnerBase):
     codebase_tests_path = CONCURBOT_TESTS_PATH
     codebase_tests_path_regex = CONCURBOT_TESTS_PATH_REGEX
-    command_template = PYTEST_COMMAND_TEMPLATE
+    command_template = DEFAULT_PYTEST_COMMAND_TEMPLATE
     test_finder_cls = PyTestUnitTestFinder
     class_regex = PYTEST_CLASS_REGEX
     run_class_pattern = RUN_PYTEST_CLASS_PATTERN
