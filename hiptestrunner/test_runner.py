@@ -238,7 +238,7 @@ class TMUXWrapper:
     def send_command(cls, command):
         cls._prepare_tmux()
         cls._execute_shell_command(
-            "tmux send-keys -t {window_id} '{command}' c-m".format(
+            "tmux send-keys -t {window_id} '{command}' Enter".format(
                 window_id=DEFAULT_TMUX_WINDOW_ID, command=command
             )
         )
@@ -252,6 +252,7 @@ class TMUXWrapper:
     def _prepare_tmux(cls):
         cls._activate_window()
         cls._exit_scroll_mode()
+        cls._clear_current_line()
         cls._clear_buffer_history()
 
     @classmethod
@@ -262,11 +263,23 @@ class TMUXWrapper:
 
     @classmethod
     def _exit_scroll_mode(cls):
-        cls._execute_shell_command("tmux send-keys -t 'q'")
+        # Send a 'q' without an "Enter" following it, as a 'q' is all
+        # that's necessary to exit vi-copy-mode, if we're in it.
+        cls._execute_shell_command("tmux send-keys -t {window_id} 'q'".format(
+            window_id=DEFAULT_TMUX_WINDOW_ID
+        ))
+
+    @classmethod
+    def _clear_current_line(cls):
+        cls._execute_shell_command("tmux send-keys -t {window_id} C-c".format(
+            window_id=DEFAULT_TMUX_WINDOW_ID
+        ))
 
     @classmethod
     def _clear_buffer_history(cls):
-        cls._execute_shell_command("tmux send-keys -R C-l \; clear-history")
+        cls._execute_shell_command("tmux send-keys -t {window_id} -R \; clear-history".format(
+            window_id=DEFAULT_TMUX_WINDOW_ID
+        ))
 
     @classmethod
     def _execute_shell_command(cls, command):
