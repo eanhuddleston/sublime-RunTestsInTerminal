@@ -63,7 +63,7 @@ class TestRunnerBase():
             )
         )
 
-        error_msg = None
+        error_msg_template = None
         if test_type == 'all':
             path_details = self.codebase_tests_path
         if test_type == 'file':
@@ -71,19 +71,17 @@ class TestRunnerBase():
         if test_type == 'class':
             path_details = self._get_path_details_for_class()
             if path_details is None:
-                error_msg = "No class found in: {}".format(
-                    self.file_name_with_path
-                )
+                error_msg_template = "No class found in: {}"
         if test_type == 'unit':
             test_finder = self.test_finder_cls(self.file_wrapper)
-            path_details = test_finder.get_path_details()
+            path_details = test_finder.get_path_details_for_test_command()
             if path_details is None:
-                error_msg = "No unit test found in: {}".format(
-                    self.file_name_with_path
-                )
+                error_msg_template = "No unit test found in: {}"
 
-        if error_msg:
-            TMUXExporter.display_notification(error_msg)
+        if error_msg_template:
+            TMUXExporter.display_notification(error_msg_template.format(
+                self.file_name_with_path
+            ))
             return
         pytest_command = self.command_template.format(path_details)
         TMUXExporter.execute_shell_command(pytest_command)
@@ -109,7 +107,7 @@ class NoseUnitTestFinder:
             )
         )
 
-    def get_path_details(self):
+    def get_path_details_for_test_command(self):
         return RUN_NOSE_METHOD_PATTERN.format(
             module_path=self.file_name_with_path,
             class_name=self._class_name,
@@ -138,7 +136,7 @@ class PyTestUnitTestFinder:
             )
         )
 
-    def get_path_details(self):
+    def get_path_details_for_test_command(self):
         self._find_closest_test_definition_from_cursor()
         test_details_dict = self._get_test_definition_details()
         if test_details_dict is None:
