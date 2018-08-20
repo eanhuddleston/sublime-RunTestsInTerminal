@@ -83,10 +83,10 @@ class TestRunnerBase():
                 )
 
         if error_msg:
-            TMUXWrapper.display_message(error_msg)
+            TMUXExporter.display_notification(error_msg)
             return
         pytest_command = self.command_template.format(path_details)
-        TMUXWrapper.send_command(pytest_command)
+        TMUXExporter.execute_shell_command(pytest_command)
 
     def _get_path_details_for_class(self):
         class_name = (
@@ -233,18 +233,18 @@ class TestFileWrapper:
         return None
 
 
-class TMUXWrapper:
+class TMUXExporter:
     @classmethod
-    def send_command(cls, command):
+    def execute_shell_command(cls, shell_command):
         cls._prepare_tmux()
         cls._execute_shell_command(
-            "tmux send-keys -t {window_id} '{command}' Enter".format(
-                window_id=DEFAULT_TMUX_WINDOW_ID, command=command
+            "tmux send-keys -t {window_id} '{shell_command}' Enter".format(
+                window_id=DEFAULT_TMUX_WINDOW_ID, shell_command=shell_command
             )
         )
 
     @classmethod
-    def display_message(cls, message):
+    def display_notification(cls, message):
         cls._prepare_tmux()
         cls._execute_shell_command("tmux display-message '{}'".format(message))
 
