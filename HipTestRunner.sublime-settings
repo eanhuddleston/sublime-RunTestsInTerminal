@@ -3,19 +3,21 @@
    Modify these settings in *.sublime-project file
 */
 {
-  "config_per_test_suite": [
-    {
-        "unique_path_for_detecting_test_suite": "Hipmunk/hipmunk/hello/concur/tests",
-        "path_subsection_to_include_in_test_command": "hipmunk/hello/concur/tests",
-        "test_framework": "pytest",
-        "command_template": "docker exec -it hipmunk_concurbot_1 pytest /hipmunk/{} -s"
-    },
-    {
-        "unique_path_for_detecting_test_suite": "Hipmunk/tests",
-        "path_subsection_to_include_in_test_command": "tests",
-        "test_framework": "nose",
-        "command_template": "hiptest {}"
-    }
+    "config_per_test_suite": [
+        {
+            "name": "Hipmunk tests",
+            "unique_path_for_detecting_test_suite": "Hipmunk/tests",
+            "path_subsection_to_include_in_test_command": "tests",
+            "test_framework": "nose",
+            "command_template": "hiptest {}"
+        },
+        {
+            "name": "Concurbot tests",
+            "unique_path_for_detecting_test_suite": "Hipmunk/hipmunk/hello/concur/tests",
+            "path_subsection_to_include_in_test_command": "hipmunk/hello/concur/tests",
+            "test_framework": "pytest",
+            "command_template": "docker exec -it hipmunk_concurbot_1 pytest /hipmunk/{} -s"
+        }
     ],
     "test_output_options": [
         {
