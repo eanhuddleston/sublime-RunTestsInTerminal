@@ -1,12 +1,14 @@
-from .hiptestrunner.test_runner import run_unit_tests
+import sublime
 import sublime_plugin
+
+from .hiptestrunner.test_runner import run_unit_tests
 
 
 class BaseTestCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        # tmux_window_id = self._get_setting('tmux_window_id')
-        # nose_command_template = self._get_setting('nose_command_template')
-        # pytest_command_template = self._get_setting('pytest_command_template')
+        settings = sublime.load_settings("HipTestRunner.sublime-settings")
+        config_per_test_suite = settings.get('config_per_test_suite', None)
+        test_output_options = settings.get('test_output_options', None)
 
         print(
             "args:",
@@ -14,15 +16,20 @@ class BaseTestCommand(sublime_plugin.TextCommand):
                 self._file_with_path, self._current_line, self.test_type
             ),
         )
-        run_unit_tests(
-            self._file_with_path, self._current_line, self.test_type
-        )
 
-    def _get_setting(self, setting_name):
-        setting_value = self.view.settings().get(setting_name, None)
-        if setting_value:
-            return setting_value.lower()
-        return None
+        print(
+            "config:",
+            "{} {}".format(
+                self.config_per_test_suite, self.test_output_options
+            ),
+        )
+        run_unit_tests(
+            self._file_with_path,
+            self._current_line,
+            self.test_type,
+            config_per_test_suite,
+            test_output_options,
+        )
 
     @property
     def _file_with_path(self):

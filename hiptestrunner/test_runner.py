@@ -34,15 +34,16 @@ def run_unit_tests(
     filename_with_full_path,
     line_num,
     test_type,
-    nose_command_template=None,
-    pytest_command_template=None,
-    tmux_window_id=None,
+    config_per_test_suite,
+    test_output_options,
 ):
     codebase = _detect_codebase_using_file_location(filename_with_full_path)
     if codebase == 'concurbot':
         run_cls = ConcurbotTestRunner
     elif codebase == 'monolith':
         run_cls = MonolithTestRunner
+    else:
+        return
     run_cls().run_tests(filename_with_full_path, line_num, test_type)
 
 
