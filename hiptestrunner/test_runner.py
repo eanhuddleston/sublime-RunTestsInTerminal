@@ -37,17 +37,19 @@ def run_unit_tests(
     config_per_test_suite,
     test_output_options,
 ):
-    codebase = _detect_codebase_using_file_location(filename_with_full_path)
-    if codebase == 'concurbot':
+    test_suite = _detect_test_suite_using_path(
+        filename_with_full_path
+    )
+    if test_suite == 'concurbot':
         run_cls = ConcurbotTestRunner
-    elif codebase == 'monolith':
+    elif test_suite == 'monolith':
         run_cls = MonolithTestRunner
     else:
         return
     run_cls().run_tests(filename_with_full_path, line_num, test_type)
 
 
-def _detect_codebase_using_file_location(filename_with_full_path):
+def _detect_test_suite_using_path(filename_with_full_path):
     if CONCURBOT_TESTS_PATH_REGEX.search(filename_with_full_path):
         return 'concurbot'
     elif MONOLITH_TESTS_PATH_REGEX.search(filename_with_full_path):

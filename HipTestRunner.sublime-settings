@@ -9,6 +9,12 @@
         "path_subsection_to_include_in_test_command": "hipmunk/hello/concur/tests",
         "test_framework": "pytest",
         "command_template": "docker exec -it hipmunk_concurbot_1 pytest /hipmunk/{} -s"
+    },
+    {
+        "unique_path_for_detecting_test_suite": "Hipmunk/tests",
+        "path_subsection_to_include_in_test_command": "tests",
+        "test_framework": "nose",
+        "command_template": "hiptest {}"
     }
     ],
     "test_output_options": [
