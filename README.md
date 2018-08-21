@@ -1,4 +1,4 @@
-# Tasty
+# Tasty (Testing At the Speed of Thought-- Yeah!)
 
 A plugin for quickly running tests from within the Sublime Text editor. Uses your cursor position to idenfity which test(s) you want to run, and runs the tests in your chosen terminal (e.g., a specific tmux or iTerm window).
 
@@ -12,9 +12,9 @@ Coming soon...
 
 Close Sublime Text, then download or clone this repository to a directory named `Tasty` in the Sublime Text Packages directory for your platform:
 
-* Linux: `git clone https://github.com/eanhuddleston/tasty.git ~/.config/sublime-text-3/Packages/Test`
 * OSX: `git clone https://github.com/eanhuddleston/tasty.git ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/Test`
-* Windows: `git clone https://github.com/eanhuddleston/tasty.git %APPDATA%\Sublime/ Text/ 3/Packages/Test`
+* Linux (untested): `git clone https://github.com/eanhuddleston/tasty.git ~/.config/sublime-text-3/Packages/Test`
+* Windows (untested): `git clone https://github.com/eanhuddleston/tasty.git %APPDATA%\Sublime/ Text/ 3/Packages/Test`
 
 ## USAGE
 
