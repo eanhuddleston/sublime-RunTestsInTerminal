@@ -20,7 +20,7 @@ class BaseTestCommand(sublime_plugin.TextCommand):
         print(
             "config:",
             "{} {}".format(
-                self.config_per_test_suite, self.test_output_options
+                config_per_test_suite, test_output_options
             ),
         )
         TestRunner().run_unit_tests(
