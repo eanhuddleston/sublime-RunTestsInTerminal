@@ -24,26 +24,25 @@ Language | Framework
 -------- | ---------
 Python | Nose
 Python | Pytest
-Mixed | Sublime Text
 
 ### Commands
 
 Command Palette | Command | Description
 --------------- | ------- | -----------
-`Tasty: test unit` | `run_tests_current_unit` | Run unit test under cursor.
-`Tasty: test class` | `run_tests_current_class` | Run all tests in the class under cursor.
-`Tasty: test file` | `run_tests_current_file` | Run all tests in current file.
-`Tasty: test suite` | `run_tests_current_suite` | Run all tests in the current test suite.
+`Tasty: test unit` | `run_tests_current_unit` | Run unit test under cursor
+`Tasty: test class` | `run_tests_current_class` | Run all tests in the class under cursor
+`Tasty: test file` | `run_tests_current_file` | Run all tests in current file
+`Tasty: test suite` | `run_tests_current_suite` | Run all tests in the current test suite
 
 ### Key Bindings
 
-Add your preferred key bindings: `Menu > Preferences > Key Bindings`. E.g.:
+Add your preferred key bindings: `Menu > Preferences > Key Bindings`.  E.g.:
 
 ```json
 [
     { "keys": ["ctrl+shift+u"], "command": "run_tests_current_unit" },
     { "keys": ["ctrl+shift+c"], "command": "run_tests_current_class" },
     { "keys": ["ctrl+shift+f"], "command": "run_tests_current_file" },
-    { "keys": ["ctrl+shift+a"], "command": "run_tests_current_suite"},
+    { "keys": ["ctrl+shift+s"], "command": "run_tests_current_suite"}
 ]
 ```
