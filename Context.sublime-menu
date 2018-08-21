@@ -16,7 +16,7 @@
             },
             {
                 "caption": "Run all tests",
-                "command": "run_tests_all"
+                "command": "run_tests_current_suite"
             }
         ]
     }

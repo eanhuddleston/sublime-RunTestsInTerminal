@@ -28,7 +28,7 @@ class TestRunner:
             test_finder = self._get_test_finder(config)
             command_exporter = self._get_test_exporter()
 
-            if self.test_type == 'all':
+            if self.test_type == 'suite':
                 path_for_test_command = config['test_suite_path']
             elif test_type == 'file':
                 path_for_test_command = self.filename_with_full_path
@@ -53,8 +53,10 @@ class TestRunner:
                 )
                 continue
 
-            trimmed_path_for_test_command = self._remove_beginning_of_test_command_path(
-                path_for_test_command, config
+            trimmed_path_for_test_command = (
+                self._remove_beginning_of_test_command_path(
+                    path_for_test_command, config
+                )
             )
             test_command = self._create_test_command_for_framework(
                 trimmed_path_for_test_command, config

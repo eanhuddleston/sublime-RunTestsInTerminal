@@ -1,18 +1,18 @@
 [
     {
-        "caption": "Tasty: Run unit test under cursor",
+        "caption": "Tasty: test unit",
         "command": "run_tests_current_unit"
     },
     {
-        "caption": "Tasty: Run all tests in current class",
+        "caption": "Tasty: test class",
         "command": "run_tests_current_class"
     },
     {
-        "caption": "Tasty: Run all tests in current file",
+        "caption": "Tasty: test file",
         "command": "run_tests_current_file"
     },
     {
-        "caption": "Tasty: Run all tests",
-        "command": "run_tests_all"
+        "caption": "Tasty: test suite",
+        "command": "run_tests_current_suite"
     }
 ]

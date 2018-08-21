@@ -52,5 +52,5 @@ class RunTestsCurrentFileCommand(BaseTestCommand):
     test_type = 'file'
 
 
-class RunTestsAllCommand(BaseTestCommand):
-    test_type = 'all'
+class RunTestsCurrentSuiteCommand(BaseTestCommand):
+    test_type = 'suite'
