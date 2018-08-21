@@ -1,7 +1,7 @@
 import sublime
 import sublime_plugin
 
-from .testrunner.test_runner import TestRunner
+from .test_runner.test_runner import TestRunner
 
 
 class BaseTestCommand(sublime_plugin.TextCommand):
