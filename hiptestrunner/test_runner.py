@@ -56,12 +56,22 @@ class TestRunner():
             )
             test_exporter.execute_shell_command(test_command)
 
-    def _send_error_msg(self, test_exporter, error_msg_template, config):
-        test_exporter.display_notification(error_msg_template.format(
-            self._remove_beginning_of_test_command_path(
-                self.filename_with_full_path, config
-            )
-        ))
+    def _does_config_apply_to_users_current_file(self, config):
+        match = re.search(
+            config['test_suite_path'],
+            self.filename_with_full_path,
+        )
+        if match:
+            return True
+        return False
+
+    def _get_test_finder(self, config):
+        test_framework = config.get('test_framework', None)
+        if test_framework == 'pytest':
+            finder_cls = PyTestUnitTestFinder
+        elif test_framework == 'nose':
+            finder_cls = NoseUnitTestFinder
+        return finder_cls(self.filename_with_full_path, self.line_num)
 
     def _get_test_exporter(self):
         output_options = self.test_output_options
@@ -77,15 +87,6 @@ class TestRunner():
         command_template = config['command_template']
         return command_template.format(trimmed_path_for_test_command)
 
-    def _does_config_apply_to_users_current_file(self, config):
-        match = re.search(
-            config['test_suite_path'],
-            self.filename_with_full_path,
-        )
-        if match:
-            return True
-        return False
-
     def _remove_beginning_of_test_command_path(
         self, test_command_path, config
     ):
@@ -95,13 +96,12 @@ class TestRunner():
         assert test_command_path.startswith(string_to_remove_from_beginning)
         return test_command_path[len(string_to_remove_from_beginning):]
 
-    def _get_test_finder(self, config):
-        test_framework = config.get('test_framework', None)
-        if test_framework == 'pytest':
-            finder_cls = PyTestUnitTestFinder
-        elif test_framework == 'nose':
-            finder_cls = NoseUnitTestFinder
-        return finder_cls(self.filename_with_full_path, self.line_num)
+    def _send_error_msg(self, test_exporter, error_msg_template, config):
+        test_exporter.display_notification(error_msg_template.format(
+            self._remove_beginning_of_test_command_path(
+                self.filename_with_full_path, config
+            )
+        ))
 
 
 NOSE_CLASS_REGEX = re.compile(r'class (\w*Tests)\(\w*\):')
