@@ -2,7 +2,7 @@
 
 A plugin for quickly running tests from within the Sublime Text editor. Uses your cursor position to identify which test(s) you want to run, and runs them in your chosen terminal (e.g., a specific tmux or iTerm window).
 
-## Installation
+## INSTALLATION
 
 ### Package Control installation
 
