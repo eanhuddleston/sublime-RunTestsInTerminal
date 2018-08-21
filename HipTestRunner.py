@@ -1,7 +1,7 @@
 import sublime
 import sublime_plugin
 
-from .hiptestrunner.test_runner import run_unit_tests
+from .hiptestrunner.test_runner import TestRunner
 
 
 class BaseTestCommand(sublime_plugin.TextCommand):
@@ -23,7 +23,7 @@ class BaseTestCommand(sublime_plugin.TextCommand):
                 self.config_per_test_suite, self.test_output_options
             ),
         )
-        run_unit_tests(
+        TestRunner().run_unit_tests(
             self._file_with_path,
             self._current_line,
             self.test_type,
