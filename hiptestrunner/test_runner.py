@@ -1,157 +1,188 @@
 import re
 import subprocess
 
-DEFAULT_TMUX_WINDOW_ID = '0:testing'
-DEFAULT_PYTEST_COMMAND_TEMPLATE = (
-    "docker exec -it hipmunk_concurbot_1 pytest /hipmunk/{} -s"
-)
-DEFAULT_NOSE_COMMAND_TEMPLATE = ("hiptest {}")
 
-CONCURBOT_TESTS_PATH = 'Hipmunk/hipmunk/hello/concur/tests'
-MONOLITH_TESTS_PATH = 'Hipmunk/tests'
-# Chop off 'Hipmunk/' in below, so the resulting command can be
-# run from 'Hipmunk' dir:
-CONCURBOT_TESTS_PATH_REGEX = re.compile(CONCURBOT_TESTS_PATH[8:] + '/.*')
-MONOLITH_TESTS_PATH_REGEX = re.compile(MONOLITH_TESTS_PATH[8:] + '/.*')
+class TestRunner():
+    def run_unit_tests(
+        self,
+        filename_with_full_path,
+        line_num,
+        test_type,
+        config_per_test_suite,
+        test_output_options,
+    ):
+        self.filename_with_full_path = filename_with_full_path
+        self.line_num = line_num
+        self.test_type = test_type
+        self.config_per_test_suite = config_per_test_suite
+        self.test_output_options = test_output_options
+
+        for config in self.config_per_test_suite:
+            if not self._does_config_apply_to_users_current_file(config):
+                continue
+
+            error_msg_template = None
+            test_finder = self._get_test_finder(config)
+            test_exporter = self._get_test_exporter()
+
+            if self.test_type == 'all':
+                path_for_test_command = config['test_suite_path']
+            elif test_type == 'file':
+                path_for_test_command = self.filename_with_full_path
+            elif test_type == 'class':
+                path_for_test_command = (
+                    test_finder.get_class_test_command_path()
+                )
+                if path_for_test_command is None:
+                    error_msg_template = "No class found in: {}"
+            elif test_type == 'unit':
+                path_for_test_command = (
+                    test_finder.get_unit_test_command_path()
+                )
+                if path_for_test_command is None:
+                    error_msg_template = "No unit test found in: {}"
+
+            if error_msg_template:
+                self._send_error_msg(test_exporter, error_msg_template, config)
+                continue
+
+            trimmed_path_for_test_command = (
+                self._remove_beginning_of_test_command_path(
+                    path_for_test_command, config
+                )
+            )
+            test_command = self._create_test_command_for_framework(
+                trimmed_path_for_test_command, config
+            )
+            test_exporter.execute_shell_command(test_command)
+
+    def _send_error_msg(self, test_exporter, error_msg_template, config):
+        test_exporter.display_notification(error_msg_template.format(
+            self._remove_beginning_of_test_command_path(
+                self.filename_with_full_path, config
+            )
+        ))
+
+    def _get_test_exporter(self):
+        output_options = self.test_output_options
+        if 'tmux' in output_options:
+            options = output_options['tmux']
+            return TMUXExporter(
+                session=options['session'], window=options['window']
+            )
+
+    def _create_test_command_for_framework(
+        self, trimmed_path_for_test_command, config
+    ):
+        command_template = config['command_template']
+        return command_template.format(trimmed_path_for_test_command)
+
+    def _does_config_apply_to_users_current_file(self, config):
+        match = re.search(
+            config['test_suite_path'],
+            self.filename_with_full_path,
+        )
+        if match:
+            return True
+        return False
+
+    def _remove_beginning_of_test_command_path(
+        self, test_command_path, config
+    ):
+        string_to_remove_from_beginning = config[
+            'beginning_of_path_to_remove_for_test_command'
+        ]
+        assert test_command_path.startswith(string_to_remove_from_beginning)
+        return test_command_path[len(string_to_remove_from_beginning):]
+
+    def _get_test_finder(self, config):
+        test_framework = config.get('test_framework', None)
+        if test_framework == 'pytest':
+            finder_cls = PyTestUnitTestFinder
+        elif test_framework == 'nose':
+            finder_cls = NoseUnitTestFinder
+        return finder_cls(self.filename_with_full_path, self.line_num)
+
+
+NOSE_CLASS_REGEX = re.compile(r'class (\w*Tests)\(\w*\):')
+NOSE_METHOD_REGEX = re.compile(r'def (test\w*)\(self\):')
+
+RUN_NOSE_CLASS_PATTERN = "{module_path}:{class_name}"
+RUN_NOSE_METHOD_PATTERN = "{module_path}:{class_name}.{method_name}"
+
+
+class NoseUnitTestFinder:
+    def __init__(self, filename_with_full_path, line_num):
+        self.filename_with_full_path = filename_with_full_path
+        self.file_wrapper = TestFileWrapper(filename_with_full_path, line_num)
+
+    def get_class_test_command_path(self):
+        class_name = self._get_class_name()
+        if class_name is None:
+            return None
+        return RUN_NOSE_CLASS_PATTERN.format(
+            module_path=self.filename_with_full_path,
+            class_name=class_name
+        )
+
+    def get_unit_test_command_path(self):
+        class_name = self._get_class_name()
+        method_name = self._get_method_name()
+        if class_name is None or method_name is None:
+            return None
+        return RUN_NOSE_METHOD_PATTERN.format(
+            module_path=self.filename_with_full_path,
+            class_name=class_name,
+            method_name=method_name,
+        )
+
+    def _get_method_name(self):
+        return self.file_wrapper.find_pattern_from_starting_line(
+            NOSE_METHOD_REGEX
+        )
+
+    def _get_class_name(self):
+        return self.file_wrapper.find_pattern_from_starting_line(
+            NOSE_CLASS_REGEX
+        )
+
 
 PYTEST_CLASS_REGEX = re.compile(r'class (Test\w*)\(\w*\):')
 GENERAL_PYTEST_TEST_DEF_REGEX = re.compile(r'def (test\w*)\(')
 PYTEST_FUNCTION_REGEX = re.compile(r'^def (test\w*)\(')
 PYTEST_METHOD_REGEX = re.compile(r'^\s{4}def (test\w*)\(')
 
-NOSE_CLASS_REGEX = re.compile(r'class (\w*Tests)\(\w*\):')
-NOSE_METHOD_REGEX = re.compile(r'def (test\w*)\(self\):')
-
 RUN_PYTEST_CLASS_PATTERN = "{module_path}::{class_name}"
 RUN_PYTEST_FUNCTION_PATTERN = "{module_path}::{function_name}"
 RUN_PYTEST_METHOD_PATTERN = "{module_path}::{class_name}::{method_name}"
 
-RUN_NOSE_CLASS_PATTERN = "{module_path}:{class_name}"
-RUN_NOSE_METHOD_PATTERN = "{module_path}:{class_name}.{method_name}"
-
-
-def run_unit_tests(
-    filename_with_full_path,
-    line_num,
-    test_type,
-    config_per_test_suite,
-    test_output_options,
-):
-    test_suite = _detect_test_suite_using_path(
-        filename_with_full_path
-    )
-    if test_suite == 'concurbot':
-        run_cls = ConcurbotTestRunner
-    elif test_suite == 'monolith':
-        run_cls = MonolithTestRunner
-    else:
-        return
-    run_cls().run_tests(filename_with_full_path, line_num, test_type)
-
-
-def _detect_test_suite_using_path(filename_with_full_path):
-    if CONCURBOT_TESTS_PATH_REGEX.search(filename_with_full_path):
-        return 'concurbot'
-    elif MONOLITH_TESTS_PATH_REGEX.search(filename_with_full_path):
-        return 'monolith'
-
-
-class TestRunnerBase():
-    def run_tests(self, filename_with_full_path, line_num, test_type):
-        self.file_wrapper = TestFileWrapper(filename_with_full_path, line_num)
-
-        self.file_name_with_path = (
-            self.file_wrapper.filename_with_path_from_regex(
-                self.codebase_tests_path_regex
-            )
-        )
-
-        error_msg_template = None
-        if test_type == 'all':
-            path_details = self.codebase_tests_path
-        if test_type == 'file':
-            path_details = self.file_name_with_path
-        if test_type == 'class':
-            path_details = self._get_path_details_for_class()
-            if path_details is None:
-                error_msg_template = "No class found in: {}"
-        if test_type == 'unit':
-            test_finder = self.test_finder_cls(self.file_wrapper)
-            path_details = test_finder.get_path_details_for_test_command()
-            if path_details is None:
-                error_msg_template = "No unit test found in: {}"
-
-        if error_msg_template:
-            TMUXExporter.display_notification(error_msg_template.format(
-                self.file_name_with_path
-            ))
-            return
-        pytest_command = self.command_template.format(path_details)
-        TMUXExporter.execute_shell_command(pytest_command)
-
-    def _get_path_details_for_class(self):
-        class_name = (
-            self.file_wrapper.find_pattern_from_starting_line(self.class_regex)
-        )
-        if class_name:
-            return self.run_class_pattern.format(
-                module_path=self.file_name_with_path,
-                class_name=class_name,
-            )
-        return None
-
-
-class NoseUnitTestFinder:
-    def __init__(self, file_wrapper):
-        self.file_wrapper = file_wrapper
-        self.file_name_with_path = (
-            self.file_wrapper.filename_with_path_from_regex(
-                MONOLITH_TESTS_PATH_REGEX
-            )
-        )
-
-    def get_path_details_for_test_command(self):
-        return RUN_NOSE_METHOD_PATTERN.format(
-            module_path=self.file_name_with_path,
-            class_name=self._class_name,
-            method_name=self._method_name,
-        )
-
-    @property
-    def _method_name(self):
-        return self.file_wrapper.find_pattern_from_starting_line(
-            NOSE_METHOD_REGEX
-        )
-
-    @property
-    def _class_name(self):
-        return self.file_wrapper.find_pattern_from_starting_line(
-            NOSE_CLASS_REGEX
-        )
-
 
 class PyTestUnitTestFinder:
-    def __init__(self, file_wrapper):
-        self.file_wrapper = file_wrapper
-        self.file_name_with_path = (
-            self.file_wrapper.filename_with_path_from_regex(
-                CONCURBOT_TESTS_PATH_REGEX
+    def __init__(self, filename_with_full_path, line_num):
+        self.filename_with_full_path = filename_with_full_path
+        self.file_wrapper = TestFileWrapper(filename_with_full_path, line_num)
+
+    def get_class_test_command_path(self):
+        return RUN_PYTEST_CLASS_PATTERN.format(
+            module_path=self.filename_with_full_path,
+            class_name=self.file_wrapper.find_pattern_from_starting_line(
+                PYTEST_CLASS_REGEX
             )
         )
 
-    def get_path_details_for_test_command(self):
+    def get_unit_test_command_path(self):
         self._find_closest_test_definition_from_cursor()
         test_details_dict = self._get_test_definition_details()
         if test_details_dict is None:
             return None
         if test_details_dict['test_type'] == 'function':
             return RUN_PYTEST_FUNCTION_PATTERN.format(
-                module_path=self.file_name_with_path,
+                module_path=self.filename_with_full_path,
                 function_name=test_details_dict['test_name'],
             )
         if test_details_dict['test_type'] == 'method':
             return RUN_PYTEST_METHOD_PATTERN.format(
-                module_path=self.file_name_with_path,
+                module_path=self.filename_with_full_path,
                 class_name=test_details_dict['class_name'],
                 method_name=test_details_dict['test_name'],
             )
@@ -176,24 +207,6 @@ class PyTestUnitTestFinder:
                 ),
             )
         return None
-
-
-class MonolithTestRunner(TestRunnerBase):
-    codebase_tests_path = MONOLITH_TESTS_PATH
-    codebase_tests_path_regex = MONOLITH_TESTS_PATH_REGEX
-    command_template = DEFAULT_NOSE_COMMAND_TEMPLATE
-    test_finder_cls = NoseUnitTestFinder
-    class_regex = NOSE_CLASS_REGEX
-    run_class_pattern = RUN_NOSE_CLASS_PATTERN
-
-
-class ConcurbotTestRunner(TestRunnerBase):
-    codebase_tests_path = CONCURBOT_TESTS_PATH
-    codebase_tests_path_regex = CONCURBOT_TESTS_PATH_REGEX
-    command_template = DEFAULT_PYTEST_COMMAND_TEMPLATE
-    test_finder_cls = PyTestUnitTestFinder
-    class_regex = PYTEST_CLASS_REGEX
-    run_class_pattern = RUN_PYTEST_CLASS_PATTERN
 
 
 class TestFileWrapper:
@@ -227,61 +240,50 @@ class TestFileWrapper:
         self.current_line_num -= 1
         return text
 
-    def filename_with_path_from_regex(self, regex):
-        match = regex.search(self.filename_with_full_path)
-        if match:
-            return match.group()
-        return None
-
 
 class TMUXExporter:
-    @classmethod
-    def execute_shell_command(cls, shell_command):
-        cls._prepare_tmux()
-        cls._execute_shell_command(
+    def __init__(self, session, window):
+        self.window_id = "{}:{}".format(session, window)
+
+    def execute_shell_command(self, shell_command):
+        self._prepare_tmux()
+        self._execute_shell_command(
             "tmux send-keys -t {window_id} '{shell_command}' Enter".format(
-                window_id=DEFAULT_TMUX_WINDOW_ID, shell_command=shell_command
+                window_id=self.window_id, shell_command=shell_command
             )
         )
 
-    @classmethod
-    def display_notification(cls, message):
-        cls._prepare_tmux()
-        cls._execute_shell_command("tmux display-message '{}'".format(message))
+    def display_notification(self, message):
+        self._prepare_tmux()
+        self._execute_shell_command("tmux display-message '{}'".format(message))
 
-    @classmethod
-    def _prepare_tmux(cls):
-        cls._activate_window()
-        cls._exit_scroll_mode()
-        cls._clear_current_line()
-        cls._clear_buffer_history()
+    def _prepare_tmux(self):
+        self._activate_window()
+        self._exit_scroll_mode()
+        self._clear_current_line()
+        self._clear_buffer_history()
 
-    @classmethod
-    def _activate_window(cls):
-        cls._execute_shell_command(
-            "tmux select-window -t {}".format(DEFAULT_TMUX_WINDOW_ID)
+    def _activate_window(self):
+        self._execute_shell_command(
+            "tmux select-window -t {}".format(self.window_id)
         )
 
-    @classmethod
-    def _exit_scroll_mode(cls):
+    def _exit_scroll_mode(self):
         # Send a 'q' without an "Enter" following it, as a 'q' is all
         # that's necessary to exit vi-copy-mode, if we're in it.
-        cls._execute_shell_command("tmux send-keys -t {window_id} 'q'".format(
-            window_id=DEFAULT_TMUX_WINDOW_ID
+        self._execute_shell_command("tmux send-keys -t {window_id} 'q'".format(
+            window_id=self.window_id
         ))
 
-    @classmethod
-    def _clear_current_line(cls):
-        cls._execute_shell_command("tmux send-keys -t {window_id} C-c".format(
-            window_id=DEFAULT_TMUX_WINDOW_ID
+    def _clear_current_line(self):
+        self._execute_shell_command("tmux send-keys -t {window_id} C-c".format(
+            window_id=self.window_id
         ))
 
-    @classmethod
-    def _clear_buffer_history(cls):
-        cls._execute_shell_command("tmux send-keys -t {window_id} -R \; clear-history".format(
-            window_id=DEFAULT_TMUX_WINDOW_ID
+    def _clear_buffer_history(self):
+        self._execute_shell_command("tmux send-keys -t {window_id} -R \; clear-history".format(
+            window_id=self.window_id
         ))
 
-    @classmethod
     def _execute_shell_command(cls, command):
         subprocess.call(command, shell=True)
