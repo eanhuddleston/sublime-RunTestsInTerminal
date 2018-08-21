@@ -1,6 +1,6 @@
 [
     {
-        "caption": "HipTestRunner",
+        "caption": "Tasty",
         "children": [
             {
                 "caption": "Run unit test under cursor",

@@ -1,12 +1,12 @@
 import sublime
 import sublime_plugin
 
-from .hiptestrunner.test_runner import TestRunner
+from .testrunner.test_runner import TestRunner
 
 
 class BaseTestCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        settings = sublime.load_settings("HipTestRunner.sublime-settings")
+        settings = sublime.load_settings("Tasty.sublime-settings")
         config_per_test_suite = settings.get('config_per_test_suite', None)
         test_output_options = settings.get('test_output_options', None)
 
@@ -19,9 +19,7 @@ class BaseTestCommand(sublime_plugin.TextCommand):
 
         print(
             "config:",
-            "{} {}".format(
-                config_per_test_suite, test_output_options
-            ),
+            "{} {}".format(config_per_test_suite, test_output_options),
         )
         TestRunner().run_unit_tests(
             self._file_with_path,

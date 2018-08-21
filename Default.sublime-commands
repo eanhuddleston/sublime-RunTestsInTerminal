@@ -1,18 +1,18 @@
 [
     {
-        "caption": "HipTestRunner: Run unit test under cursor",
+        "caption": "Tasty: Run unit test under cursor",
         "command": "run_tests_current_unit"
     },
     {
-        "caption": "HipTestRunner: Run all tests in current class",
+        "caption": "Tasty: Run all tests in current class",
         "command": "run_tests_current_class"
     },
     {
-        "caption": "HipTestRunner: Run all tests in current file",
+        "caption": "Tasty: Run all tests in current file",
         "command": "run_tests_current_file"
     },
     {
-        "caption": "HipTestRunner: Run all tests",
+        "caption": "Tasty: Run all tests",
         "command": "run_tests_all"
     }
 ]
