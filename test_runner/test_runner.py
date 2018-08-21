@@ -21,7 +21,7 @@ class TestRunner:
         self.test_output_options = test_output_options
 
         for config in self.config_per_test_suite:
-            if not self._does_config_apply_to_users_current_file(config):
+            if not self._does_config_apply_to_current_file(config):
                 continue
 
             error_msg_template = None
@@ -59,7 +59,7 @@ class TestRunner:
             )
             command_exporter.execute_shell_command(test_command)
 
-    def _does_config_apply_to_users_current_file(self, config):
+    def _does_config_apply_to_current_file(self, config):
         match = re.search(
             config['test_suite_path'], self.filename_with_full_path
         )
@@ -96,7 +96,7 @@ class TestRunner:
             'beginning_of_path_to_remove_for_test_command'
         ]
         assert test_command_path.startswith(string_to_remove_from_beginning)
-        return test_command_path[len(string_to_remove_from_beginning):]
+        return test_command_path[len(string_to_remove_from_beginning) :]
 
     def _send_error_msg(self, command_exporter, error_msg_template, config):
         command_exporter.display_notification(
