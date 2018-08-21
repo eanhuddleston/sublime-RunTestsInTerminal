@@ -1,5 +1,0 @@
-[
-    {
-        "keys": ["ctrl+super+t"], "command": "run_unit_test"
-    }
-]
