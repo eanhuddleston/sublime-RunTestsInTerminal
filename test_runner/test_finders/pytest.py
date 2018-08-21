@@ -18,11 +18,14 @@ class PyTestUnitTestFinder:
         self.file_wrapper = FileWrapper(filename_with_full_path, line_num)
 
     def get_class_test_command_path(self):
+        class_name = self.file_wrapper.find_pattern_from_starting_line(
+            PYTEST_CLASS_REGEX
+        )
+        if class_name is None:
+            return None
+
         return RUN_PYTEST_CLASS_PATTERN.format(
-            module_path=self.filename_with_full_path,
-            class_name=self.file_wrapper.find_pattern_from_starting_line(
-                PYTEST_CLASS_REGEX
-            ),
+            module_path=self.filename_with_full_path, class_name=class_name
         )
 
     def get_unit_test_command_path(self):
