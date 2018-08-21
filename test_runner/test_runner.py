@@ -37,13 +37,15 @@ class TestRunner:
                     test_finder.get_class_test_command_path()
                 )
                 if path_for_test_command is None:
-                    error_msg_template = "No class found in: {}"
+                    error_msg_template = "No class found at current location"
             elif test_type == 'unit':
                 path_for_test_command = (
                     test_finder.get_unit_test_command_path()
                 )
                 if path_for_test_command is None:
-                    error_msg_template = "No unit test found in: {}"
+                    error_msg_template = (
+                        "No unit test found at current location"
+                    )
 
             if error_msg_template:
                 self._send_error_msg(

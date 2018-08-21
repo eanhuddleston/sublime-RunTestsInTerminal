@@ -2,7 +2,7 @@ import re
 
 from ..common import FileWrapper
 
-NOSE_CLASS_REGEX = re.compile(r'class (\w*Tests)\(\w*\):')
+NOSE_CLASS_REGEX = re.compile(r'class (\w*Test\w*)\(')
 NOSE_METHOD_REGEX = re.compile(r'def (test\w*)\(self\):')
 
 RUN_NOSE_CLASS_PATTERN = "{module_path}:{class_name}"
