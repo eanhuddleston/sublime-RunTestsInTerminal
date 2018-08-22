@@ -16,6 +16,7 @@ class ItermExporter:
         self._execute_shell_command(applescript_command)
 
     def display_notification(self, message):
+        # iTerm is only on OS X, so just use OS X's notification functionality
         applescript_command = """
         tell application "iTerm"
             display notification "{message}" with title "Tasty error"
