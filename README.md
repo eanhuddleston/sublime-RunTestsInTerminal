@@ -1,6 +1,6 @@
 # Tasty (Testing At the Speed of Thought-- Yeah!)
 
-A plugin for quickly running tests from within the Sublime Text editor. Uses your cursor position to identify which test(s) you want to run, and runs them in your chosen terminal (e.g., a specific tmux or iTerm window).
+A plugin for quickly running tests from within the Sublime Text editor. Uses your cursor position to identify which test(s) you want to run, and runs them in your chosen terminal (currently supports tmux and iTerm).
 
 ## INSTALLATION
 
