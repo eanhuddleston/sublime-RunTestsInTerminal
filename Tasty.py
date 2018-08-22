@@ -10,6 +10,13 @@ class BaseTestCommand(sublime_plugin.TextCommand):
         config_per_test_suite = settings.get('config_per_test_suite', None)
         test_output_options = settings.get('test_output_options', None)
 
+        if config_per_test_suite is None or test_output_options is None:
+            print(
+                "Tasty was not able to load your config settings; \
+                please consult the README on github for where to place them."
+            )
+            return
+
         print(
             "args:",
             "{} {} {}".format(
@@ -22,11 +29,11 @@ class BaseTestCommand(sublime_plugin.TextCommand):
             "{} {}".format(config_per_test_suite, test_output_options),
         )
         TestRunner().run_unit_tests(
-            self._file_with_path,
-            self._current_line,
-            self.test_type,
-            config_per_test_suite,
-            test_output_options,
+            filename_with_full_path=self._file_with_path,
+            line_num=self._current_line,
+            test_type=self.test_type,
+            config_per_test_suite=config_per_test_suite,
+            test_output_options=test_output_options,
         )
 
     @property
