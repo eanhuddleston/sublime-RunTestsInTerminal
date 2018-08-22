@@ -1,7 +1,7 @@
 import subprocess
 
 
-class TMUXExporter:
+class TmuxExporter:
     def __init__(self, session, window):
         self.window_id = "{}:{}".format(session, window)
 

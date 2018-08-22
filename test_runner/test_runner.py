@@ -1,6 +1,7 @@
 import re
 
-from .command_exporters.tmux import TMUXExporter
+from .command_exporters.tmux import TmuxExporter
+from .command_exporters.iterm import ItermExporter
 from .test_finders.nose import NoseUnitTestFinder
 from .test_finders.pytest import PyTestUnitTestFinder
 
@@ -83,9 +84,12 @@ class TestRunner:
         output_options = self.test_output_options
         if 'tmux' in output_options:
             options = output_options['tmux']
-            return TMUXExporter(
+            return TmuxExporter(
                 session=options['session'], window=options['window']
             )
+        elif 'iterm' in output_options:
+            options = output_options['iterm']
+            return ItermExporter()
 
     def _create_test_command_for_framework(
         self, trimmed_path_for_test_command, config
