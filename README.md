@@ -6,7 +6,7 @@ A plugin for quickly running tests from within the Sublime Text editor. Uses you
 
 ### Package Control installation
 
-Install [Package Control](https://packagecontrol.io/) use it to install `RunThisTest` within Submlime Text.
+Install [Package Control](https://packagecontrol.io/) use it within Sublime Text to search for and install `RunThisTest`.
 
 ### Manual installation
 
