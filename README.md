@@ -6,15 +6,13 @@ A plugin for quickly running tests from within the Sublime Text editor. Uses you
 
 ### Package Control installation
 
-Coming soon...
+Install [Package Control](https://packagecontrol.io/) and install `RunThisTest` with it within Submlime Text.
 
 ### Manual installation
 
-Close Sublime Text, then download or clone this repository to a directory named `RunThisTest` in the Sublime Text Packages directory for your platform:
+Copy this repository to a directory named `RunThisTest` in the Sublime Text Packages directory. E.g., for OS X:
 
-* OSX: `git clone https://github.com/eanhuddleston/sublime-RunThisTest.git ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/RunThisTest`
-* Linux (untested): `git clone https://github.com/eanhuddleston/sublime-RunThisTest.git ~/.config/sublime-text-3/Packages/RunThisTest`
-* Windows (untested): `git clone https://github.com/eanhuddleston/sublime-RunThisTest.git %APPDATA%\Sublime/ Text/ 3/Packages/RunThisTest`
+`git clone https://github.com/eanhuddleston/sublime-RunThisTest.git ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/RunThisTest`
 
 ## USAGE
 
