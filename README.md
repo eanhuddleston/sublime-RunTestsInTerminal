@@ -27,6 +27,27 @@ Python | Pytest
 
 ### Configuration
 
+You need to tell RunThisTest how to run the tests in your different projects and also in which terminal the tests should be executed (currently tmux and iTerm are supported).
+
+Example settings:
+
+```
+{
+    "config_per_test_suite": [
+        {
+            "test_suite_path": "/Users/Bob/awesome_project/tests",
+            "test_framework": "pytest",
+            "command_template": "pytest {}"
+        }
+    ],
+    "test_output_options": {
+        "iterm": {}
+    }
+}
+```
+
+Access settings in `Preferences > Package Settings > RunThisTest`.
+
 ### Commands
 
 Command Palette | Command | Description

@@ -1,0 +1,42 @@
+/*
+    config_per_test_suite:
+
+        name: for user's convenience; not used by RunThisTest.
+
+        test_suite_path: path to the test suite; will be used to detect whether the config settings are applicable to a file you've tried to run tests on.
+
+        beginning_of_path_to_remove_for_test_command: in some cases, you may need to remove part of the beginning of the file path for the test command you want to run (e.g., if running the tests in Docker). Whatever is included here will be removed from the file's path.
+
+        test_framework: the test framework that files in this test suite should be run with.  This lets RunThisTest know which patterns to look for when trying to extract tests from a file. Current supported test frameworks: "nose" and "pytest".
+
+        command_template: the test command that should be run. Note: you must include "{}" in your string, as this is how the file path (and options) will be inserted into the command.
+
+    test_output_options:
+
+        This is how you tell RunThisTest where you want the tests to be run. Currently, tmux and iTerm are supported.
+*/
+
+{
+    "config_per_test_suite": [
+        {
+            "test_suite_path": "/Users/i860933/repos/Hipmunk/tests",
+            "beginning_of_path_to_remove_for_test_command": "/Users/i860933/repos/Hipmunk/",
+            "test_framework": "nose",
+            "command_template": "hiptest {}"
+        },
+        {
+            "test_suite_path": "/Users/i860933/repos/Hipmunk/hipmunk/hello/concur/tests",
+            "beginning_of_path_to_remove_for_test_command": "/Users/i860933/repos/Hipmunk/",
+            "test_framework": "pytest",
+            "command_template": "docker exec -it hipmunk_concurbot_1 pytest /hipmunk/{} -s"
+        }
+    ],
+    "test_output_options": {
+        "tmux": {
+            "session": "0",
+            "window": "testing"
+        }
+    }
+}
+/*        "iterm": {}
+*/
