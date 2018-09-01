@@ -2,6 +2,8 @@
 
 A plugin for quickly running tests from within the Sublime Text editor. Uses your cursor position to identify which test(s) you want to run, and runs them in your chosen terminal (currently supports tmux and iTerm).
 
+Currently supports tests Python unittest and Pytest tests, but can be easily extended for other languages and test frameworks.
+
 ## INSTALLATION
 
 ### Package Control installation
@@ -20,7 +22,7 @@ Copy this repository to a directory named `RunThisTest` in the Sublime Text Pack
 
 Language | Framework
 -------- | ---------
-Python | Nose
+Python | unittest
 Python | Pytest
 
 ### Configuration

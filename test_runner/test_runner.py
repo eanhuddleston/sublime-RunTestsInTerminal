@@ -2,7 +2,7 @@ import re
 
 from .command_exporters.tmux import TmuxExporter
 from .command_exporters.iterm import ItermExporter
-from .test_finders.nose import NoseUnitTestFinder
+from .test_finders.unittest import UnittestUnitTestFinder
 from .test_finders.pytest import PyTestUnitTestFinder
 
 
@@ -76,8 +76,8 @@ class TestRunner:
         test_framework = config.get('test_framework', None)
         if test_framework == 'pytest':
             finder_cls = PyTestUnitTestFinder
-        elif test_framework == 'nose':
-            finder_cls = NoseUnitTestFinder
+        elif test_framework == 'unittest':
+            finder_cls = UnittestUnitTestFinder
         return finder_cls(self.filename_with_full_path, self.line_num)
 
     def _get_command_exporter(self):
