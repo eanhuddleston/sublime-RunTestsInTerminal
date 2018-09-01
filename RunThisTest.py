@@ -6,7 +6,7 @@ from .test_runner.test_runner import TestRunner
 
 class BaseTestCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        settings = sublime.load_settings("RunTestsInTerminal.sublime-settings")
+        settings = sublime.load_settings("RunThisTest.sublime-settings")
         config_per_test_suite = settings.get('config_per_test_suite', None)
         test_output_options = settings.get('test_output_options', None)
 

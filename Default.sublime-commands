@@ -1,18 +1,18 @@
 [
     {
-        "caption": "RunTestsInTerminal: test unit",
+        "caption": "RunThisTest: test unit",
         "command": "run_tests_current_unit"
     },
     {
-        "caption": "RunTestsInTerminal: test class",
+        "caption": "RunThisTest: test class",
         "command": "run_tests_current_class"
     },
     {
-        "caption": "RunTestsInTerminal: test file",
+        "caption": "RunThisTest: test file",
         "command": "run_tests_current_file"
     },
     {
-        "caption": "RunTestsInTerminal: test suite",
+        "caption": "RunThisTest: test suite",
         "command": "run_tests_current_suite"
     }
 ]
