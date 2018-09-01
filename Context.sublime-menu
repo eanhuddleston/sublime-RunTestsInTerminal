@@ -1,6 +1,6 @@
 [
     {
-        "caption": "Tasty",
+        "caption": "RunTestsInTerminal",
         "children": [
             {
                 "caption": "Run unit test under cursor",

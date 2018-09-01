@@ -1,4 +1,4 @@
-# Tasty (Testing At the Speed of Thought-- Yeah!)
+# RunThisTest
 
 A plugin for quickly running tests from within the Sublime Text editor. Uses your cursor position to identify which test(s) you want to run, and runs them in your chosen terminal (currently supports tmux and iTerm).
 
@@ -10,11 +10,11 @@ Coming soon...
 
 ### Manual installation
 
-Close Sublime Text, then download or clone this repository to a directory named `Tasty` in the Sublime Text Packages directory for your platform:
+Close Sublime Text, then download or clone this repository to a directory named `RunThisTest` in the Sublime Text Packages directory for your platform:
 
-* OSX: `git clone https://github.com/eanhuddleston/tasty.git ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/Test`
-* Linux (untested): `git clone https://github.com/eanhuddleston/tasty.git ~/.config/sublime-text-3/Packages/Test`
-* Windows (untested): `git clone https://github.com/eanhuddleston/tasty.git %APPDATA%\Sublime/ Text/ 3/Packages/Test`
+* OSX: `git clone https://github.com/eanhuddleston/sublime-RunThisTest.git ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/RunThisTest`
+* Linux (untested): `git clone https://github.com/eanhuddleston/sublime-RunThisTest.git ~/.config/sublime-text-3/Packages/RunThisTest`
+* Windows (untested): `git clone https://github.com/eanhuddleston/sublime-RunThisTest.git %APPDATA%\Sublime/ Text/ 3/Packages/RunThisTest`
 
 ## USAGE
 
@@ -29,10 +29,10 @@ Python | Pytest
 
 Command Palette | Command | Description
 --------------- | ------- | -----------
-`Tasty: test unit` | `run_tests_current_unit` | Run unit test under cursor
-`Tasty: test class` | `run_tests_current_class` | Run all tests in the class under cursor
-`Tasty: test file` | `run_tests_current_file` | Run all tests in current file
-`Tasty: test suite` | `run_tests_current_suite` | Run all tests in the current test suite
+`RunThisTest: test unit` | `run_tests_current_unit` | Run unit test under cursor
+`RunThisTest: test class` | `run_tests_current_class` | Run all tests in the class under cursor
+`RunThisTest: test file` | `run_tests_current_file` | Run all tests in current file
+`RunThisTest: test suite` | `run_tests_current_suite` | Run all tests in the current test suite
 
 ### Key Bindings
 

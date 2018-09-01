@@ -6,13 +6,13 @@ from .test_runner.test_runner import TestRunner
 
 class BaseTestCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        settings = sublime.load_settings("Tasty.sublime-settings")
+        settings = sublime.load_settings("RunTestsInTerminal.sublime-settings")
         config_per_test_suite = settings.get('config_per_test_suite', None)
         test_output_options = settings.get('test_output_options', None)
 
         if config_per_test_suite is None or test_output_options is None:
             print(
-                "Tasty was not able to load your config settings; \
+                "RunThisTest was not able to load your config settings; \
                 please consult the README on github for where to place them."
             )
             return

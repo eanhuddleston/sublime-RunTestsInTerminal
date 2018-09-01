@@ -1,18 +1,18 @@
 [
     {
-        "caption": "Tasty: test unit",
+        "caption": "RunTestsInTerminal: test unit",
         "command": "run_tests_current_unit"
     },
     {
-        "caption": "Tasty: test class",
+        "caption": "RunTestsInTerminal: test class",
         "command": "run_tests_current_class"
     },
     {
-        "caption": "Tasty: test file",
+        "caption": "RunTestsInTerminal: test file",
         "command": "run_tests_current_file"
     },
     {
-        "caption": "Tasty: test suite",
+        "caption": "RunTestsInTerminal: test suite",
         "command": "run_tests_current_suite"
     }
 ]
