@@ -25,6 +25,8 @@ Language | Framework
 Python | Nose
 Python | Pytest
 
+### Configuration
+
 ### Commands
 
 Command Palette | Command | Description

@@ -7,27 +7,14 @@ from .test_runner.test_runner import TestRunner
 class BaseTestCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         settings = sublime.load_settings("RunThisTest.sublime-settings")
-        config_per_test_suite = settings.get('config_per_test_suite', None)
-        test_output_options = settings.get('test_output_options', None)
+        config_per_test_suite = settings.get('config_per_test_suite', {})
+        test_output_options = settings.get('test_output_options', {})
 
-        if config_per_test_suite is None or test_output_options is None:
-            print(
-                "RunThisTest was not able to load your config settings; \
-                please consult the README on github for where to place them."
-            )
+        if not config_per_test_suite or not test_output_options:
+            error_msg = "RunThisTest was not able to load your config settings; please consult the README."
+            sublime.error_message(error_msg)
             return
 
-        print(
-            "args:",
-            "{} {} {}".format(
-                self._file_with_path, self._current_line, self.test_type
-            ),
-        )
-
-        print(
-            "config:",
-            "{} {}".format(config_per_test_suite, test_output_options),
-        )
         TestRunner().run_unit_tests(
             filename_with_full_path=self._file_with_path,
             line_num=self._current_line,

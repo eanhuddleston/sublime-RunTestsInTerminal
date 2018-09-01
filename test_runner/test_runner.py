@@ -27,7 +27,7 @@ class TestRunner:
 
             error_msg_template = None
             test_finder = self._get_test_finder(config)
-            command_exporter = self._get_test_exporter()
+            command_exporter = self._get_command_exporter()
 
             if self.test_type == 'suite':
                 path_for_test_command = config['test_suite_path']
@@ -54,13 +54,13 @@ class TestRunner:
                 )
                 continue
 
-            trimmed_path_for_test_command = (
-                self._remove_beginning_of_test_command_path(
+            final_path_for_test_command = (
+                self._remove_beginning_of_test_command_path_if_needed(
                     path_for_test_command, config
                 )
             )
             test_command = self._create_test_command_for_framework(
-                trimmed_path_for_test_command, config
+                final_path_for_test_command, config
             )
             command_exporter.execute_shell_command(test_command)
 
@@ -80,7 +80,7 @@ class TestRunner:
             finder_cls = NoseUnitTestFinder
         return finder_cls(self.filename_with_full_path, self.line_num)
 
-    def _get_test_exporter(self):
+    def _get_command_exporter(self):
         output_options = self.test_output_options
         if 'tmux' in output_options:
             options = output_options['tmux']
@@ -97,19 +97,21 @@ class TestRunner:
         command_template = config['command_template']
         return command_template.format(trimmed_path_for_test_command)
 
-    def _remove_beginning_of_test_command_path(
+    def _remove_beginning_of_test_command_path_if_needed(
         self, test_command_path, config
     ):
-        string_to_remove_from_beginning = config[
+        string_to_remove_from_beginning = config.get(
             'beginning_of_path_to_remove_for_test_command'
-        ]
+        )
+        if string_to_remove_from_beginning is None:
+            return test_command_path
         assert test_command_path.startswith(string_to_remove_from_beginning)
         return test_command_path[len(string_to_remove_from_beginning):]
 
     def _send_error_msg(self, command_exporter, error_msg_template, config):
         command_exporter.display_notification(
             error_msg_template.format(
-                self._remove_beginning_of_test_command_path(
+                self._remove_beginning_of_test_command_path_if_needed(
                     self.filename_with_full_path, config
                 )
             )
