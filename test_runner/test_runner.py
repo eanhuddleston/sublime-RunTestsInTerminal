@@ -104,7 +104,7 @@ class TestRunner:
             'beginning_of_path_to_remove_for_test_command'
         ]
         assert test_command_path.startswith(string_to_remove_from_beginning)
-        return test_command_path[len(string_to_remove_from_beginning) :]
+        return test_command_path[len(string_to_remove_from_beginning):]
 
     def _send_error_msg(self, command_exporter, error_msg_template, config):
         command_exporter.display_notification(
