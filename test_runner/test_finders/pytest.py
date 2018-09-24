@@ -2,7 +2,7 @@ import re
 
 from ..common import FileWrapper
 
-PYTEST_CLASS_REGEX = re.compile(r'class (Test\w*)\(\w*\):')
+PYTEST_CLASS_REGEX = re.compile(r'class (Test\w*)\(?\w*\)?:')
 GENERAL_PYTEST_TEST_DEF_REGEX = re.compile(r'def (test\w*)\(')
 PYTEST_FUNCTION_REGEX = re.compile(r'^def (test\w*)\(')
 PYTEST_METHOD_REGEX = re.compile(r'^\s{4}def (test\w*)\(')
